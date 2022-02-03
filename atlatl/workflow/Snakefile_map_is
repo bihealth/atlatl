@@ -1,0 +1,115 @@
+import os.path
+import pathlib
+
+workdir: config["workdir"]
+
+# =============================================================================
+#  INPUT FILES
+
+reads_table = config["reads_table"] # list of paired end illumina reads
+in_repeats  = config["in_repeats"] if config["in_repeats"] else None # intersect with reference (.bed file)
+
+# -----------------------------------------------------------------------------
+#  paths from prep
+reference   = config["reference"]   if config["reference"]   else "PREP/ref_aug.fasta"
+annotations = config["annotations"] if config["annotations"] else "PREP/annotations.bed"
+
+# -----------------------------------------------------------------------------
+# intermediary paths
+annotations_paf = "FEATURECOUNTS/features/annotations.paf"
+repeats_paf     = "FEATURECOUNTS/repeats/repeats.paf"
+
+# -----------------------------annotations line in open(in_reads)]
+
+lineList = [line.rstrip('\n') for line in reads_table]
+
+readdata = {s.split('\t')[0]:' '.join(s.split('\t')[1:]) for s in lineList}
+
+def get_pair(_sample,R=1):
+    return readdata[_sample].split(' ')[R]
+
+# =============================================================================
+# RULES
+
+rule all:
+    input:
+        fcounts,
+        expand("ALIGN/{sample}.bam", sample=list(readdata.keys())),
+        rcounts if in_repeats else None
+
+# -----------------------------------------------------------------------------
+#  ALIGNMENT
+# -----------------------------------------------------------------------------
+
+rule QC_ante:
+    params:
+        i=lambda wildcards: readdata[wildcards.sample].split(' ')[0],
+        I=lambda wildcards: readdata[wildcards.sample].split(' ')[1]
+    output:
+        o="FASTQ/R1.{sample}.fastq.gz",
+        O="FASTQ/R2.{sample}.fastq.gz"
+    shell:
+        "fastp -i {params.i} -I {params.I} -o {output.o} -O {output.O}"
+
+# -----------------------------------------------------------------------------
+#  READ MAPPING
+
+rule alignment:
+    input:
+        ref=reference,
+        R1="FASTQ/R1.{sample}.fastq.gz",
+        R2="FASTQ/R2.{sample}.fastq.gz"
+    output:
+        "ALIGN/{sample}.bam"
+    threads:
+        int(max(0,int(workflow.cores) -1))
+    shell:
+        "bwa mem -t {threads} {input} | samtools view -b | samtools sort > {output}; samtools index {output};"
+# -----------------------------------------------------------------------------
+#  FEATURE COUNTS
+# -----------------------------------------------------------------------------
+
+rule annotations_bed_to_paf:
+    input:
+        annotations
+    output:
+        annotations_paf
+    shell:
+        """awk 'OFS="\\t" {{print $1"."$2"."$3, $1, $2, $3, "."}}' {input} > {output}"""
+
+#rule repeats_bed_to_paf:
+#    input:
+#        in_repeats
+#    output:
+#        repeats_paf
+#    shell:
+#        """awk 'OFS="\\t" {{print $1"."$2"."$3, $1, $2, $3, "."}}' {input} > {output}"""
+
+rule featurecount:
+    input:
+        bam=expand("ALIGN/{sample}.bam", sample=list(readdata.keys())),
+        feat=annotations_paf
+    output:
+        fcounts
+    shell:
+        "featureCounts \
+        -F SAF -M --fraction -L -R CORE \
+        -a {input.feat} \
+        -o {output} \
+        {input.bam};"
+
+#  ---  currently not in use  ---  #
+#rule repeatcount:
+#    input:
+#        bam=expand("ALIGN/{sample}.bam", sample=list(readdata.keys())),
+#        rep=repeats_paf
+#    output:
+#        rcounts
+#    shell:
+#        "featureCounts \
+#        -F SAF -M --fraction -L -R CORE \
+#        -a {input.rep} \
+#        -o {output} \
+#        {input.bam}; \
+#        sed -i '/0$/d' {output};"
+

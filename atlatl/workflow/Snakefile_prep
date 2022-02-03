@@ -1,0 +1,85 @@
+import os.path
+import pathlib
+
+workdir: config["workdir"]
+
+# -----------------------------------------------------------------------------
+#  INPUT FILES
+
+in_alleles          = config["alleles"]
+in_fastas           = config["fastas"]
+in_reference        = config["reference"]
+in_add_annotations  = config["add_annotations"]
+
+# -----------------------------------------------------------------------------
+#  automatic paths
+
+reference   = "PREP/ref_aug.fasta"
+constructs  = "PREP/constructs.fasta"
+annotations = "PREP/annotations.bed" # for the whole reference and alleles
+
+# -----------------------------------------------------------------------------
+
+# temporaray in use
+constructs_features    = "PREP/constructs_features.bed"
+
+# =============================================================================
+#  UTIL
+
+# =============================================================================
+# RULES
+
+rule all:
+    input:
+        constructs,
+        constructs_features,
+        reference,
+        annotations
+
+# -----------------------------------------------------------------------------
+#  prepare alleles
+
+rule assemble_and_save_sequences:
+    input:
+        al=expand(in_alleles),
+        ref=in_reference,
+        fa=expand(in_fastas)
+    output:
+        al=constructs,
+        fe=constructs_features
+    log: "logs/assemble_and_save_sequences.log"
+    threads: 1
+    shell:
+        "atlatl assemble_and_save_sequences\
+            -s {input.fa} {input.ref} \
+            -b {input.al} \
+            -o {output.al} \
+            -e {output.fe}"
+
+rule add_constructs_ro_ref:
+    input:
+        in_reference,
+        constructs
+    params:
+        60
+    output:
+        reference
+    log: "logs/add_constructs_ro_ref.log"
+    threads: 1
+    shell:
+        "atlatl add_constructs_ro_ref\
+            -i {input} \
+            -o {output} \
+            -w {params}; \
+        samtools faidx {output}"
+
+rule cat_features_bed:
+    input:
+        constructs_features,
+        in_add_annotations
+    output:
+        annotations
+    log: "logs/cat_features_bed.log"
+    threads: 1
+    shell:
+        "cat {input} > {output}"

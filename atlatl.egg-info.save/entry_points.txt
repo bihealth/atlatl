@@ -1,0 +1,3 @@
+[console_scripts]
+atlatl = atlatl.__main__:main
+

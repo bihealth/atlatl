@@ -1,0 +1,34 @@
+Metadata-Version: 2.1
+Name: atlatl
+Version: 0+untagged.80.g18de993
+Summary: Clinical sequencing panel CNV caller and visualizer
+Home-page: https://github.com/bihealth/edu-msc-vinzenz-synthetic-dna/atlatl
+Author: Vinzenz May
+Author-email: Vinzenz.May@mdc-berlin.de
+License: UNKNOWN
+Description: ![Continuous Integration Status](https://github.com/bihealth/clear-CNV/workflows/CI/badge.svg)
+        [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/2eaafb57fbb74a46b918e9f58142c880)](https://www.codacy.com?utm_source=github.com&utm_medium=referral&utm_content=bihealth/clear-CNV&utm_campaign=Badge_Coverage)
+        [![Codacy Badge](https://app.codacy.com/project/badge/Grade/2eaafb57fbb74a46b918e9f58142c880)](https://www.codacy.com?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=bihealth/clear-CNV&amp;utm_campaign=Badge_Grade)
+        [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+        
+        # TODO
+        
+        # History
+        
+        ## v0.0.1
+        
+        - Everything is new!
+        
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Natural Language :: English
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
