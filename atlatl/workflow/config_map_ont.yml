@@ -1,0 +1,8 @@
+annotations: /media/memsonmi/ext_drive/genome-writing-qc/READSIM/synth/test/PREP/annotations.bed
+constructs: /media/memsonmi/ext_drive/genome-writing-qc/READSIM/synth/test/PREP/construct_ideal.fasta
+depth: 0
+in_reads: /media/memsonmi/ext_drive/genome-writing-qc/READSIM/synth/test/INPUT/construct_inv_1600_16.fastq
+minimap_r: 95
+minimap_z: 95
+reference: /media/memsonmi/ext_drive/genome-writing-qc/READSIM/synth/test/PREP/ref.fasta
+workdir: /media/memsonmi/ext_drive/genome-writing-qc/READSIM/synth/test
