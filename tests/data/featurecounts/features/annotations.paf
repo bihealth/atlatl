@@ -1,0 +1,10 @@
+construct_a.0.500	construct_a	0	500	.
+construct_a.500.5500	construct_a	500	5500	.
+construct_a.5500.10500	construct_a	5500	10500	.
+construct_a.10500.15500	construct_a	10500	15500	.
+construct_a.15500.16000	construct_a	15500	16000	.
+construct_b.0.500	construct_b	0	500	.
+construct_b.500.5500	construct_b	500	5500	.
+construct_b.5500.6000	construct_b	5500	6000	.
+chr1.49500.50000	chr1	49500	50000	.
+chr2.50000.50500	chr2	50000	50500	.

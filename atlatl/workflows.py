@@ -1,5 +1,6 @@
 #%%
 import subprocess
+import tempfile
 import pathlib
 import yaml
 from logzero import logger
@@ -34,15 +35,9 @@ def workflow_prep(
         'reference': reference,
         'add_annotations': add_annotations
     }
-    # --- generate path --- #
-    configpath = (
-        pathlib.Path(__file__).absolute().parent
-        / pathlib.Path("workflow")
-        / pathlib.Path("config_prep.yml")
-    )
-    
     # --- save config --- #
-    with open(configpath, "wt") as f:
+    tmp_config = tempfile.NamedTemporaryFile(suffix='yml')
+    with open(tmp_config.name, "wt") as f:
         yaml.safe_dump(d,stream=f,default_flow_style=False)
     
     # --- run snakemake with config --- #
@@ -55,12 +50,13 @@ def workflow_prep(
             / pathlib.Path("Snakefile_prep")
         ),
         "--configfile",
-        str(configpath),
+        str(tmp_config.name),
         "--cores",
         str(cores),
     ]
     logger.info("calling snakemake via \n"+' '.join(arguments))
     subprocess.check_call(arguments)
+
 
 def workflow_map_ont(
         workdir:str,
@@ -94,15 +90,9 @@ def workflow_map_ont(
         'minimap_r': minimap_r,
         'minimap_z': minimap_z
     }
-    # --- generate path --- #
-    configpath = (
-        pathlib.Path(__file__).absolute().parent
-        / pathlib.Path("workflow")
-        / pathlib.Path("config_map_ont.yml")
-    )
-    
     # --- save config --- #
-    with open(configpath, "wt") as f:
+    tmp_config = tempfile.NamedTemporaryFile(suffix='yml')
+    with open(tmp_config.name, "wt") as f:
         yaml.safe_dump(d,stream=f,default_flow_style=False)
     
     # --- run snakemake with config --- #
@@ -115,14 +105,12 @@ def workflow_map_ont(
             / pathlib.Path("Snakefile_map_ont")
         ),
         "--configfile",
-        str(configpath),
+        str(tmp_config.name),
         "--cores",
         str(cores),
     ]
     logger.info("calling snakemake via \n"+' '.join(arguments))
     subprocess.check_call(arguments)
-
-
 
 
 def workflow_map_is(
@@ -149,15 +137,10 @@ def workflow_map_is(
         'reference': reference,
         'annotations': annotations
     }
-    # --- generate path --- #
-    configpath = (
-        pathlib.Path(__file__).absolute().parent
-        / pathlib.Path("workflow")
-        / pathlib.Path("config_map_is.yml")
-    )
-    
+
     # --- save config --- #
-    with open(configpath, "wt") as f:
+    tmp_config = tempfile.NamedTemporaryFile(suffix='yml')
+    with open(tmp_config.name, "wt") as f:
         yaml.safe_dump(d,stream=f,default_flow_style=False)
     
     # --- run snakemake with config --- #
@@ -170,7 +153,7 @@ def workflow_map_is(
             / pathlib.Path("Snakefile_map_is")
         ),
         "--configfile",
-        str(configpath),
+        str(tmp_config.name),
         "--cores",
         str(cores),
     ]

@@ -1,7 +1,7 @@
-add_annotations: /fast/work/projects/genome-writing-qc/2021-08-09_Vinzenz_MidSox9_rerun/INPUT/features_on_ref.bed
+add_annotations: /home/memsonmi/DEV/atlatl/tests/data/input/annotations.bed
 alleles:
-- /fast/work/projects/genome-writing-qc/2021-08-09_Vinzenz_MidSox9_rerun/INPUT/construct_rnd.bed
+- /home/memsonmi/DEV/atlatl/tests/data/input/construct.bed
 fastas:
-- /fast/work/projects/genome-writing-qc/2021-08-09_Vinzenz_MidSox9_rerun/INPUT/sequences.fasta
-reference: /fast/work/projects/genome-writing-qc/REF/mm10.chr11.fa
-workdir: /fast/work/projects/genome-writing-qc/2021-08-09_Vinzenz_MidSox9_rerun
+- /home/memsonmi/DEV/atlatl/tests/data/input/sequences.fasta
+reference: /home/memsonmi/DEV/atlatl/tests/data/input/ref.fasta
+workdir: /home/memsonmi/DEV/atlatl/tests/data

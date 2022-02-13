@@ -62,10 +62,13 @@ def bed_to_features_bed(
     bed = pd.read_csv(input,sep='\t',header=None)
     allele_name = pathlib.Path(input).stem
 
-    allel = pd.DataFrame(np.array([[0,*list(bed.iloc[:,2].cumsum()[0:-1])],bed.iloc[:,2].cumsum()])).T
-    allel.columns = ['start','end']
-    allel['chr'] = allele_name
-    allel['id'] = bed[0]
+    end = (bed.iloc[:,2]-bed.iloc[:,1]).cumsum().to_numpy()
+    start = np.array([0,*end[:-1]])
+
+    allel = pd.DataFrame([allele_name]*bed.shape[0],columns=["chr"])
+    allel.loc[:,"start"] = start
+    allel.loc[:,"end"] = end
+    allel.loc[:,'id'] = bed.iloc[:,3]
     if output:
         allel.loc[:,['chr','start','end','id']].to_csv(pathlib.Path(output),sep='\t',header=False,index=False)
     return allel.loc[:,['chr','start','end','id']]
@@ -381,8 +384,12 @@ def print_breakends_and_overlaps(alignment_path,bed_path,save_dir,prefix="",chrs
             aln_file = pathlib.Path(tmpdir) / "aln.bam"
             # CRITICAL: {annot[1].min()}-{annot[2].max()} makes it ncessary to define the whole region in the bed file! Not very good.
             cmd_view = shlex.split(f"samtools view -b --write-index {str(alignment_path)} \"{chr}:{annot[1].min()}-{annot[2].max()}\" -o {str(aln_file)}")
+            print(' '.join(cmd_view))
             subprocess.call(cmd_view)
             A = np.array([a for a in pysam.AlignmentFile(aln_file, "rb")])
+            if len(A) == 0:
+                logger.info(f"no reads aligned in region {chr}:{annot[1].min()}-{annot[2].max()}")
+                continue
             reflen = max([a.reference_end for a in A]) - min([a.reference_end for a in A])
             reads = np.unique([al.query_name for al in A])
             significant_pbs = find_significant_BEs(alignments=A,reflen=reflen,reads=reads,r=r,alpha=alpha,min_alignments=min_alignments,cutoff=cutoff,all_ends=all_ends,no_be=no_be)

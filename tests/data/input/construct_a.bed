@@ -1,0 +1,5 @@
+chr1	49500	50000	homA
+ORF	0	5000	ORF
+signal	0	5000	signal
+cargo	0	5000	cargo
+chr1	50000	50500	homB

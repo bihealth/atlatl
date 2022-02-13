@@ -11,24 +11,24 @@ in_reads    = config["in_reads"] # map to ref + ava expansion mapping
 
 # -----------------------------------------------------------------------------
 #  paths from prep
-reference   = config["reference"]   if config["reference"]   else "PREP/ref_aug.fasta"
-annotations = config["annotations"] if config["annotations"] else "PREP/annotations.bed"
-constructs  = config["constructs"]  if config["constructs"]  else "PREP/constructs.fasta"   # used in ava expansion mapping
+reference   = config["reference"]   if config["reference"]   else "prep/ref_aug.fasta"
+annotations = config["annotations"] if config["annotations"] else "prep/annotations.bed"
+constructs  = config["constructs"]  if config["constructs"]  else "prep/constructs.fasta"   # used in ava expansion mapping
 
 # -----------------------------------------------------------------------------
 # intermediary paths
-annotations_paf = "FEATURECOUNTS/features/annotations.paf"
+annotations_paf = "featurecounts/features/annotations.paf"
 #repeats_paf     = "FEATURECOUNTS/repeats/repeats.paf"
 
 # -----------------------------------------------------------------------------
 #  output paths
 
-#rcounts = "FEATURECOUNTS/repeats/rcounts.saf"
-fcounts = "FEATURECOUNTS/features/fcounts.saf"
+#rcounts = "featurecounts/repeats/rcounts.saf"
+fcounts = "featurecounts/features/fcounts.saf"
 
-ref_align = "ALIGN/alignment.bam"
-salign = "ALIGN/salign.bam"
-sreads = "FASTQ/sreads.fastq"
+ref_align = "align/alignment.bam"
+salign = "align/salign.bam"
+sreads = "fastq/sreads.fastq"
 
 # =============================================================================
 #  UTIL

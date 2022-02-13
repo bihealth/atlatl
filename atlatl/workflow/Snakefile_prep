@@ -14,14 +14,14 @@ in_add_annotations  = config["add_annotations"]
 # -----------------------------------------------------------------------------
 #  automatic paths
 
-reference   = "PREP/ref_aug.fasta"
-constructs  = "PREP/constructs.fasta"
-annotations = "PREP/annotations.bed" # for the whole reference and alleles
+reference   = "prep/ref_aug.fasta"
+constructs  = "prep/constructs.fasta"
+annotations = "prep/annotations.bed" # for the whole reference and alleles
 
 # -----------------------------------------------------------------------------
 
 # temporaray in use
-constructs_features    = "PREP/constructs_features.bed"
+constructs_features    = "prep/constructs_features.bed"
 
 # =============================================================================
 #  UTIL
@@ -39,7 +39,7 @@ rule all:
 # -----------------------------------------------------------------------------
 #  prepare alleles
 
-rule assemble_and_save_sequences:
+rule construct_and_save_sequences:
     input:
         al=expand(in_alleles),
         ref=in_reference,
@@ -47,10 +47,10 @@ rule assemble_and_save_sequences:
     output:
         al=constructs,
         fe=constructs_features
-    log: "logs/assemble_and_save_sequences.log"
+    log: "logs/construct_and_save_sequences.log"
     threads: 1
     shell:
-        "atlatl assemble_and_save_sequences\
+        "atlatl construct_and_save_sequences\
             -s {input.fa} {input.ref} \
             -b {input.al} \
             -o {output.al} \
