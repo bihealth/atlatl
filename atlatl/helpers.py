@@ -306,9 +306,13 @@ def breakends_of_aligned_fragment(al_frag,cutoff=30,all_ends=False,no_be=False):
         break_points.append(al_frag.reference_end)
     return np.array(break_points,dtype=int)
 
-def bp_is_significant(alpha,ref_length,num_breakpoints,num_reads,r):
-    logp = ((np.log(num_reads*2*r / ref_length)) * num_breakpoints)
-    return -np.log(alpha) < logp
+def bp_is_significant(alpha,ref_length,num_breakpoints,all_BEs,r,length_adjustment=2):
+    p = 1/ref_length
+    P = (1-p)**all_BEs
+    E = (num_breakpoints-2) * np.log(1-P)
+    significant = np.log(alpha) < E + r + length_adjustment* np.log(ref_length)
+    return significant
+
 
 def al_has_be(al,be,r,cutoff,all_ends,no_be):
     for be_al in breakends_of_aligned_fragment(al_frag=al,cutoff=cutoff,all_ends=all_ends,no_be=no_be):
@@ -336,7 +340,7 @@ def find_significant_BEs(alignments,reflen,reads,r,alpha,min_alignments,cutoff,a
             if bp_support[b] >= min_alignments:
                 significant_pbs.append(b)
         else:
-            if bp_is_significant(alpha=alpha,ref_length=reflen,num_breakpoints=bp_support[b],num_reads=len(reads),r=r):
+            if bp_is_significant(alpha=alpha,ref_length=reflen,num_breakpoints=bp_support[b],all_BEs=len(BEs),r=r):
                 significant_pbs.append(b)
     return significant_pbs
 

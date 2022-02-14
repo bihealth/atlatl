@@ -75,7 +75,7 @@ def get_parser():
     parser_breakends.add_argument("-b","--bedfile", type=os.path.abspath,required=True , help="input: path to .bed file which specifies all regions of interest. IMPORTANT: only alignments covering the regions defined in this file are considered!")
     parser_breakends.add_argument("-o","--out_dir", type=os.path.abspath,required=True , help="output: path to the directory where the final dataframes are written to files.")
     parser_breakends.add_argument("--prefix", type=str, default="", help="prefix of output tables' names. The naming scheme looks like: [out_dir]/[prefix.][chr].tsv")
-    parser_breakends.add_argument("--alpha", type=float, default=0.01, help="threshold for significance of breakends. Default is 0.01. Has no effect if min_alignments > 0.")
+    parser_breakends.add_argument("--alpha", type=float, default=0.001, help="threshold for approximated significance of breakends. Default is 0.001. Has no effect if min_alignments > 0.")
     parser_breakends.add_argument("--radius", type=int, default=30, help="radius for breakpoints to account for significance. Default is 30.")
     parser_breakends.add_argument("--thresh_covered", type=float, default=0.5, help="threshold for coverage of an alignment per region to be considered covered. Should not be smaller than 0.8. Default is 0.5.")
     parser_breakends.add_argument("--cutoff_clipped", type=int, default=30, help="number of bases that are clipped but are not considered to indicate a break end. Default is 30.")
