@@ -5,6 +5,9 @@ Clone this directory.
 Create a fresh conda environment.
 `conda create -n atlatl --file envs/atlatl.yml -y`
 
+Then activate the environment.
+`conda activate atlatl`
+
 cd into it.
 `cd atlatl`
 
