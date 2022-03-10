@@ -3,7 +3,7 @@ Clone this directory.
 `git clone git@github.com:bihealth/atlatl.git`
 
 Create a fresh conda environment.
-`conda create -n atlatl --file requirements/base.txt -y`
+`conda create -n atlatl --file envs/atlatl.yml -y`
 
 cd into it.
 `cd atlatl`
@@ -11,7 +11,7 @@ cd into it.
 Then install atlatl via pip.
 `pip install .`
 
-Done, now you can use it. First test it:
+Done, now you can test and use it.
 
 ## Run Tests of atlatl
 #### Input Preprocessing
