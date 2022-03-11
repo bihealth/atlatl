@@ -11,8 +11,8 @@ Then activate the environment.
 cd into it.
 `cd atlatl`
 
-Then install atlatl via pip.
-`pip install .`
+Then install atlatl via pip. The installation will be kept in this directory.
+`pip install -e .`
 
 Done, now you can test and use it.
 
