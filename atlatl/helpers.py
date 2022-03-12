@@ -564,7 +564,11 @@ def visualize_assembly(alignments_path:str,annotations_path:str,outpath:str,chrs
         cmd_intersect = shlex.split(f"bedtools intersect -nonamecheck -a {annotations_path} -b {tmp_region_file.name}")
         with open(tmp_annot_file.name,'w') as g:
             subprocess.check_call(cmd_intersect,stdout=g)
-            features = pd.read_csv(tmp_annot_file.name,sep='\t',header=None)
+            if pathlib.Path(tmp_annot_file.name).stat().st_size:
+                features = pd.read_csv(tmp_annot_file.name,sep='\t',header=None)
+            else:
+                logger.warn(f"No annotations selected for {chr} in interval {str(refstart)},{str(refend)}")
+                continue
         features.columns = ["chr","start","end","name"]
         features.loc[:,['start','end']] -= refstart
         features = features.sort_values(by='start')
@@ -603,7 +607,7 @@ def visualize_assembly(alignments_path:str,annotations_path:str,outpath:str,chrs
                 showlegend=False),row=chri+1, col=1)
         # --- draw alignments --- #
         for i,a in enumerate(alns):
-            col = blue if a.is_reverse else red
+            col = blue #blue if a.is_reverse else red
             h = alns_read_heights[i]
         # --- alignments on read --- #
             qstart,qend = start_end_query_on_read(a,reverse=False)
@@ -678,7 +682,7 @@ def visualize_assembly(alignments_path:str,annotations_path:str,outpath:str,chrs
                     fillcolor=annotation_color,
                     hoveron = 'fills', # select where hover is active
                     line_color='grey',
-                    text=f"Ref= {ft}:{'{:,}'.format(refstart+fs)}-{'{:,}'.format(refstart+fe)}", # maybe add coordinates
+                    text=f"Ref= {chr} {ft}:{'{:,}'.format(refstart+fs)}-{'{:,}'.format(refstart+fe)}", # maybe add coordinates
                     hoverinfo = 'text',
                     showlegend=False),row=chri+1, col=1)
         # save fig and return
