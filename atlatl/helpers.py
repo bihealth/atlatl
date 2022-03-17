@@ -574,8 +574,13 @@ def visualize_assembly(alignments_path:str,annotations_path:str,outpath:str,chrs
         features = features.sort_values(by='start')
         features.index = range(features.shape[0])
         a = alns[0]
+        sum_rev = sum([int(a.is_reverse) * (a.reference_end - a.reference_start) for a in alns])
+        sum_fwd = sum([int(not a.is_reverse) * (a.reference_end - a.reference_start) for a in alns])
+        alns_reversed = sum_fwd >= sum_rev
         # define colors
         red,blue,dgrey,lgrey = 'rgb(201, 55, 44)','rgb(44, 96, 201)','rgb(100,100,100)','rgb(200,200,200)'
+        if alns_reversed:
+            red,blue = blue,red
         annotation_color = 'rgb(150,150,220)'
         # calc height for alignments on read
         alns_read_heights = get_heights([start_end_query_on_read(a) for a in alns])
@@ -607,7 +612,7 @@ def visualize_assembly(alignments_path:str,annotations_path:str,outpath:str,chrs
                 showlegend=False),row=chri+1, col=1)
         # --- draw alignments --- #
         for i,a in enumerate(alns):
-            col = blue #blue if a.is_reverse else red
+            col = blue if a.is_reverse else red
             h = alns_read_heights[i]
         # --- alignments on read --- #
             qstart,qend = start_end_query_on_read(a,reverse=False)
