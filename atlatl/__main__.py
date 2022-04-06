@@ -50,13 +50,13 @@ def get_parser():
     # =========================================================================
     #  group_assemble_and_visualize
     # =========================================================================
-    parser_group_assemble_and_visualize = subparsers.add_parser("group_assemble_and_visualize",description="Generates a fastq file of reads that align transitively (to reads that align) to a target region.")
-    parser_group_assemble_and_visualize.add_argument("-a","--alleles", type=os.path.abspath,required=True , help="input: path to the reference. fasta file with all regions of interest.")
-    parser_group_assemble_and_visualize.add_argument("-r","--reads", type=os.path.abspath,required=True , help="input: path to fastq-file with all ONT reads.")
-    parser_group_assemble_and_visualize.add_argument("-o","--output", type=os.path.abspath,required=True , help="output: path to output fastq file.")
-    parser_group_assemble_and_visualize.add_argument("-c","--cores", type=int, default=8, help="param: number of cores used by minimap2. Default is 8")
-    parser_group_assemble_and_visualize.add_argument("-d","--depth", type=int, default=0, help="param: maximum recursive depth in all-vs-all mapping and read selection. 0 is default.")
-    parser_group_assemble_and_visualize.set_defaults(func=tools.write_fastq_of_transitive_reads)
+    #parser_group_assemble_and_visualize = subparsers.add_parser("group_assemble_and_visualize",description="Generates a fastq file of reads that align transitively (to reads that align) to a target region.")
+    #parser_group_assemble_and_visualize.add_argument("-a","--alleles", type=os.path.abspath,required=True , help="input: path to the reference. fasta file with all regions of interest.")
+    #parser_group_assemble_and_visualize.add_argument("-r","--reads", type=os.path.abspath,required=True , help="input: path to fastq-file with all ONT reads.")
+    #parser_group_assemble_and_visualize.add_argument("-o","--output", type=os.path.abspath,required=True , help="output: path to output fastq file.")
+    #parser_group_assemble_and_visualize.add_argument("-c","--cores", type=int, default=8, help="param: number of cores used by minimap2. Default is 8")
+    #parser_group_assemble_and_visualize.add_argument("-d","--depth", type=int, default=0, help="param: maximum recursive depth in all-vs-all mapping and read selection. 0 is default.")
+    #parser_group_assemble_and_visualize.set_defaults(func=tools.write_fastq_of_transitive_reads)
 
     # =========================================================================
     #  add_constructs_ro_ref
@@ -106,8 +106,8 @@ def get_parser():
     parser_assemble_and_visualize.add_argument("--annotations", type=os.path.abspath,required=True , help="input:  path to bed file which annotates all relevant regions. IMPORTANT: only reads that align to the reference in the annotated regions are considered.")
     parser_assemble_and_visualize.add_argument("--reads", type=os.path.abspath,required=True , help="input: path to fastq(.gz) file containing all reads from which the named reads are selected.")
     parser_assemble_and_visualize.add_argument("--reference", type=os.path.abspath,required=True , help="input: path to the indexed reference file in fasta(.gz) format.")
-    parser_assemble_and_visualize.add_argument("--name_forward", type=os.path.abspath,required=True , help="output: name of final html output of forward assembly.")
-    parser_assemble_and_visualize.add_argument("--name_reverse", type=os.path.abspath,required=True , help="output: name of final html output of reverse complement assembly.")
+    parser_assemble_and_visualize.add_argument("--outfile_forward", type=os.path.abspath,required=True , help="output: name of final html output of forward assembly.")
+    parser_assemble_and_visualize.add_argument("--outfile_reverse", type=os.path.abspath,required=True , help="output: name of final html output of reverse complement assembly.")
     parser_assemble_and_visualize.add_argument("--fastaout", type=os.path.abspath,required=True , help="output: path to the file to which the final consensus will be written.")
     parser_assemble_and_visualize.add_argument("--fastaout_reversed", type=os.path.abspath,required=True , help="output: same as [bamout] but for the reverse complement sequence.")
     parser_assemble_and_visualize.add_argument("--bamout", type=os.path.abspath,required=True , help="output: path to the final compressed and indexed alignment file (/path/to/file.bam).")
@@ -136,6 +136,7 @@ def get_parser():
     parser_group_assemble_and_visualize.add_argument("--fasta_name", type=str,required=False, default='consensus' , help="param: Name of the sequence in the fasta file.")
     parser_group_assemble_and_visualize.add_argument("--technology", type=str,required=False, default='ont' , help="param: Name of the used technology. Choose from ONT: 'ont', PacBio: 'pb'. Default is 'ont'.")
     parser_group_assemble_and_visualize.add_argument("--thickness", type=int, default=5, help="param: in visualizations - thickness of objects. Default is 5.")
+    parser_group_assemble_and_visualize.add_argument("--img_format", type=str, default='html', help="param: output image in one of the formats: html, pdf, png")
     parser_group_assemble_and_visualize.set_defaults(func=tools.group_assemble_and_visualize)
 
     # =========================================================================

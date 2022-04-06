@@ -136,8 +136,8 @@ def assemble_and_visualize(readgroup:str,
                             annotations:str,
                             reads:str,
                             reference:str,
-                            name_forward:str,
-                            name_reverse:str,
+                            outfile_forward:str,
+                            outfile_reverse:str,
                             fastaout:str,
                             fastaout_reversed:str,
                             bamout:str,
@@ -175,8 +175,8 @@ def assemble_and_visualize(readgroup:str,
                         annotations=annotations,
                         reads=reads,
                         reference=reference,
-                        name_forward=name_forward,
-                        name_reverse=name_reverse,
+                        outfile_forward=outfile_forward,
+                        outfile_reverse=outfile_reverse,
                         fastaout=fastaout,
                         fastaout_reversed=fastaout_reversed,
                         bamout=bamout,
@@ -201,6 +201,7 @@ def group_assemble_and_visualize(
                             fasta_name:str="",
                             technology:str='ont',
                             thickness:int=5,
+                            img_format='html',
                             **kwargs):
     """
     Given the breakends table, this function extracts all informative read groups, assembles, and visualizes each of them.
@@ -233,4 +234,5 @@ def group_assemble_and_visualize(
                             minimum_reads=minimum_reads,
                             fasta_name=fasta_name,
                             technology=technology,
-                            thickness=thickness)
+                            thickness=thickness,
+                            img_format=img_format)

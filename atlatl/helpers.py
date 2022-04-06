@@ -9,6 +9,7 @@ import numpy as np
 import tempfile
 import io
 import os
+from scipy.stats import binom
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from logzero import logger
@@ -306,13 +307,8 @@ def breakends_of_aligned_fragment(al_frag,cutoff=30,all_ends=False,no_be=False):
         break_points.append(al_frag.reference_end)
     return np.array(break_points,dtype=int)
 
-def bp_is_significant(alpha,ref_length,num_breakpoints,all_BEs,r,length_adjustment=2):
-    p = 1/ref_length
-    P = (1-p)**all_BEs
-    E = (num_breakpoints-2) * np.log(1-P)
-    significant = np.log(alpha) < E + r + length_adjustment* np.log(ref_length)
-    return significant
-
+def bp_is_significant(alpha,break_point_candidates,num_breakpoints,all_BEs):
+    return 1-binom.cdf(n=all_BEs,k=num_breakpoints,p=1/break_point_candidates) < alpha
 
 def al_has_be(al,be,r,cutoff,all_ends,no_be):
     for be_al in breakends_of_aligned_fragment(al_frag=al,cutoff=cutoff,all_ends=all_ends,no_be=no_be):
@@ -325,7 +321,7 @@ def find_significant_BEs(alignments,reflen,reads,r,alpha,min_alignments,cutoff,a
     if len(arrs) == 0:
         return []
     x = np.sort(np.concatenate(arrs))
-    y = np.array([0]*len(x),dtype=int)
+    np.zeros(len(x),dtype=int)
     while not (x==y).all():
         y = x
         x = np.apply_along_axis(np.round,0,[np.median(x[(x >= b -r) & (x <= b +r)]) for b in x])
@@ -340,7 +336,7 @@ def find_significant_BEs(alignments,reflen,reads,r,alpha,min_alignments,cutoff,a
             if bp_support[b] >= min_alignments:
                 significant_pbs.append(b)
         else:
-            if bp_is_significant(alpha=alpha,ref_length=reflen,num_breakpoints=bp_support[b],all_BEs=len(BEs),r=r):
+            if bp_is_significant(alpha=alpha,num_breakpoints=bp_support[b],break_point_candidates=len(BEs),all_BEs=len(x)):
                 significant_pbs.append(b)
     return significant_pbs
 
@@ -457,7 +453,7 @@ def readgroups_to_files(path_bes,out_dir,prefix,minimum_reads=5):
     return filenames
 
 def align_assembly(reference, fastain, bamout, threads):
-    cmd_align = shlex.split(f"minimap2 -a -x asm10 -t {threads} {reference} {fastain}")
+    cmd_align = shlex.split(f"minimap2 -a -x asm10 -t {threads} -r95,95 -z95,95 {reference} {fastain}")
     cmd_compress = shlex.split("samtools view -b")
     cmd_sort = shlex.split(f"samtools sort -o {bamout}")
     cmd_index = shlex.split(f"samtools index {bamout}")
@@ -693,7 +689,10 @@ def visualize_assembly(alignments_path:str,annotations_path:str,outpath:str,chrs
         # save fig and return
     fig.update_layout(showlegend=False)
     pathlib.Path(outpath).parent.mkdir(parents=True,exist_ok=True)
-    fig.write_html(outpath)
+    if outpath.split('.')[-1] == 'html':
+        fig.write_html(outpath)
+    else:
+        fig.write_image(outpath)
     return fig
 
 # =============================================================================
@@ -712,10 +711,14 @@ def group_assemble_and_visualize(
                             minimum_reads:int=5,
                             fasta_name:str="",
                             technology:str='ont',
-                            thickness:int=5):
+                            thickness:int=5,
+                            img_format='html'):
     """
     Generates visualizations of all informative read groups found in a table of breakends.
     """
+    fmts = ['html','png','pdf']
+    if not img_format in fmts:
+        logger.error("Must choose file format from ")
     filenames = readgroups_to_files(breakends,outdir,prefix,minimum_reads)
     for i,readgroup in enumerate(filenames):
         strkey = str(i).zfill(len(str(len(filenames))))
@@ -724,15 +727,15 @@ def group_assemble_and_visualize(
         bamout   = pathlib.Path(outdir) / (used_prefix+'.bam')
         fastaoutr= pathlib.Path(outdir) / (used_prefix+'.reversed.fasta')
         bamoutr  = pathlib.Path(outdir) / (used_prefix+'.reversed.bam')
-        hmtl_forward = str(pathlib.Path(vizdir) / (used_prefix+'.html'))
-        hmtl_reverse = str(pathlib.Path(vizdir) / (used_prefix+'.reverse.html'))
+        outfile_forward = str(pathlib.Path(vizdir) / (used_prefix+'.'+img_format))
+        outfile_reverse = str(pathlib.Path(vizdir) / (used_prefix+'.reverse.'+img_format))
         assemble_and_visualize(
                             readgroup=readgroup,
                             annotations=annotations,
                             reads=reads,
                             reference=reference,
-                            name_forward=hmtl_forward,
-                            name_reverse=hmtl_reverse,
+                            outfile_forward=outfile_forward,
+                            outfile_reverse=outfile_reverse,
                             fastaout=fastaout,
                             fastaout_reversed=fastaoutr,
                             bamout=bamout,
@@ -747,8 +750,8 @@ def assemble_and_visualize(readgroup:str,
                             annotations:str,
                             reads:str,
                             reference:str,
-                            name_forward:str,
-                            name_reverse:str,
+                            outfile_forward:str,
+                            outfile_reverse:str,
                             fastaout:str,
                             fastaout_reversed:str,
                             bamout:str,
@@ -764,5 +767,5 @@ def assemble_and_visualize(readgroup:str,
     readgroup: .txt with one read name per line.
     """
     consensus_from_given_read_names(readgroup,reads,reference,fastaout,fastaout_reversed,bamout,bamout_reversed,threads,fasta_name,technology)
-    visualize_assembly(bamout,annotations,name_forward,chrs,thickness=thickness)
-    visualize_assembly(bamout_reversed,annotations,name_reverse,chrs,thickness=thickness)
+    visualize_assembly(bamout,annotations,outfile_forward,chrs,thickness=thickness)
+    visualize_assembly(bamout_reversed,annotations,outfile_reverse,chrs,thickness=thickness)
