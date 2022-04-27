@@ -25,7 +25,7 @@ Once the input is preprocessed, a workflow in atlatl can be used to map the read
 `atlatl workflow_map --workdir tests/data/ --constructs tests/data/prep/constructs.fasta --in_reads tests/data/input/reads.fastq --reference tests/data/prep/ref_aug.fasta --annotations tests/data/prep/annotations.bed --cores 2`
 
 #### Breakend Calculation
-`atlatl breakends --alignment tests/data/align/alignment.bam --bedfile tests/data/prep/annotations.bed --out_dir tests/data/breakends --min_alignments 5`
+`atlatl breakends --alignment tests/data/align/alignment.bam --bedfile tests/data/prep/annotations.bed --out_dir tests/data/breakends --breakends 5`
 
 #### Assebmle and Visualize Haplotypes
 `atlatl group_assemble_and_visualize --breakends tests/data/breakends/construct_a.tsv --annotations tests/data/prep/annotations.bed --reads tests/data/input/reads.fastq --reference tests/data/prep/ref_aug.fasta --outdir tests/data/assembly --threads 4`

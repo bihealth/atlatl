@@ -316,7 +316,7 @@ def al_has_be(al,be,r,cutoff,all_ends,no_be):
             return True
     return False
 
-def find_significant_BEs(alignments,reflen,reads,r,alpha,min_alignments,cutoff,all_ends,no_be):
+def find_significant_BEs(alignments,reflen,reads,r,alpha,min_breakends,cutoff,all_ends,no_be):
     arrs = [breakends_of_aligned_fragment(al_frag=al,cutoff=cutoff,all_ends=all_ends,no_be=no_be) for al in alignments]
     if len(arrs) == 0:
         return []
@@ -332,8 +332,8 @@ def find_significant_BEs(alignments,reflen,reads,r,alpha,min_alignments,cutoff,a
             bp_support[b] += al_has_be(al,b,r,cutoff,all_ends=all_ends,no_be=no_be)
     significant_pbs = []
     for b in bp_support.keys():
-        if min_alignments > 0:
-            if bp_support[b] >= min_alignments:
+        if min_breakends > 0:
+            if bp_support[b] >= min_breakends:
                 significant_pbs.append(b)
         else:
             if bp_is_significant(alpha=alpha,num_breakpoints=bp_support[b],break_point_candidates=len(BEs),all_BEs=len(x)):
@@ -352,7 +352,7 @@ def get_profiles_of_reads(alignments,significant_pbs,readnames,radius=20,cthresh
     return profiles
 # unused end
 
-def print_breakends_and_overlaps(alignment_path,bed_path,save_dir,prefix="",chrs=[],alpha=0.01,min_alignments=0,r=30,thresh=0.5,cutoff=30,all_ends=False,no_be=False,print_overlaps=False):
+def print_breakends_and_overlaps(alignment_path,bed_path,save_dir,prefix="",chrs=[],alpha=0.01,min_breakends=0,r=30,thresh=0.5,cutoff=30,all_ends=False,no_be=False,print_overlaps=False):
     """
     Significant breakends are calculated from given alignments per chromosome.
     A dataframe is printed to file which shows read names vs (breakends, segments).
@@ -394,7 +394,7 @@ def print_breakends_and_overlaps(alignment_path,bed_path,save_dir,prefix="",chrs
                 continue
             reflen = max([a.reference_end for a in A]) - min([a.reference_end for a in A])
             reads = np.unique([al.query_name for al in A])
-            significant_pbs = find_significant_BEs(alignments=A,reflen=reflen,reads=reads,r=r,alpha=alpha,min_alignments=min_alignments,cutoff=cutoff,all_ends=all_ends,no_be=no_be)
+            significant_pbs = find_significant_BEs(alignments=A,reflen=reflen,reads=reads,r=r,alpha=alpha,min_breakends=min_breakends,cutoff=cutoff,all_ends=all_ends,no_be=no_be)
             # create 2 tables:
             named_regions = ['-'.join(map(str,annot.loc[i,[3,1,2]])) for i in annot.index]
             annot.index = named_regions
