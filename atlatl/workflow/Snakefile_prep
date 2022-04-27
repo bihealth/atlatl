@@ -7,7 +7,7 @@ workdir: config["workdir"]
 #  INPUT FILES
 
 in_alleles          = config["alleles"]
-in_fastas           = config["fastas"]
+in_fastas           = config["sequences"]
 in_reference        = config["reference"]
 in_add_annotations  = config["add_annotations"]
 

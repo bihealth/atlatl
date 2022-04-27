@@ -321,7 +321,7 @@ def find_significant_BEs(alignments,reflen,reads,r,alpha,min_alignments,cutoff,a
     if len(arrs) == 0:
         return []
     x = np.sort(np.concatenate(arrs))
-    np.zeros(len(x),dtype=int)
+    y = np.zeros(len(x),dtype=int)
     while not (x==y).all():
         y = x
         x = np.apply_along_axis(np.round,0,[np.median(x[(x >= b -r) & (x <= b +r)]) for b in x])
@@ -384,7 +384,7 @@ def print_breakends_and_overlaps(alignment_path,bed_path,save_dir,prefix="",chrs
             aln_file = pathlib.Path(tmpdir) / "aln.bam"
             # CRITICAL: {annot[1].min()}-{annot[2].max()} makes it ncessary to define the whole region in the bed file! Not very good.
             cmd_view = shlex.split(f"samtools view -b --write-index {str(alignment_path)} \"{chr}:{annot[1].min()}-{annot[2].max()}\" -o {str(aln_file)}")
-            print(' '.join(cmd_view))
+            logger.info(' '.join(cmd_view))
             subprocess.call(cmd_view)
             A = np.array([a for a in pysam.AlignmentFile(aln_file, "rb")])
             if len(A) == 0:
@@ -530,7 +530,7 @@ def start_end_query_on_read(query,reverse=False):
         e,s = l-s, l-e
     return s,e
 
-def visualize_assembly(alignments_path:str,annotations_path:str,outpath:str,chrs:list,thickness:int=5):
+def visualize_assembly(alignments_path:pathlib.PosixPath,annotations_path:pathlib.PosixPath,outpath:pathlib.PosixPath,chrs:list,thickness:int=5):
     aln_path   = pathlib.Path(alignments_path)
     # load all alignments to dict, where each key corresponds to a chr
     alignments = defaultdict(list)
@@ -689,7 +689,7 @@ def visualize_assembly(alignments_path:str,annotations_path:str,outpath:str,chrs
         # save fig and return
     fig.update_layout(showlegend=False)
     pathlib.Path(outpath).parent.mkdir(parents=True,exist_ok=True)
-    if outpath.split('.')[-1] == 'html':
+    if outpath.suffix == '.html':
         fig.write_html(outpath)
     else:
         fig.write_image(outpath)
@@ -705,7 +705,6 @@ def group_assemble_and_visualize(
                             reads:str,
                             reference:str,
                             outdir:str,
-                            vizdir:str,
                             threads:int=3,
                             prefix:str="",
                             minimum_reads:int=5,
@@ -723,23 +722,13 @@ def group_assemble_and_visualize(
     for i,readgroup in enumerate(filenames):
         strkey = str(i).zfill(len(str(len(filenames))))
         used_prefix = strkey if prefix == "" else prefix + '.' + strkey
-        fastaout = pathlib.Path(outdir) / (used_prefix+'.fasta')
-        bamout   = pathlib.Path(outdir) / (used_prefix+'.bam')
-        fastaoutr= pathlib.Path(outdir) / (used_prefix+'.reversed.fasta')
-        bamoutr  = pathlib.Path(outdir) / (used_prefix+'.reversed.bam')
-        outfile_forward = str(pathlib.Path(vizdir) / (used_prefix+'.'+img_format))
-        outfile_reverse = str(pathlib.Path(vizdir) / (used_prefix+'.reverse.'+img_format))
+        outfiles_prefix = pathlib.Path(outdir) / used_prefix
         assemble_and_visualize(
                             readgroup=readgroup,
                             annotations=annotations,
                             reads=reads,
                             reference=reference,
-                            outfile_forward=outfile_forward,
-                            outfile_reverse=outfile_reverse,
-                            fastaout=fastaout,
-                            fastaout_reversed=fastaoutr,
-                            bamout=bamout,
-                            bamout_reversed=bamoutr,
+                            outfiles_prefix=outfiles_prefix,
                             threads=threads,
                             chrs=chrs,
                             fasta_name=fasta_name,
@@ -750,22 +739,37 @@ def assemble_and_visualize(readgroup:str,
                             annotations:str,
                             reads:str,
                             reference:str,
-                            outfile_forward:str,
-                            outfile_reverse:str,
-                            fastaout:str,
-                            fastaout_reversed:str,
-                            bamout:str,
-                            bamout_reversed:str,
+                            outfiles_prefix:str,
                             chrs:list,
                             threads:int=3,
                             fasta_name:str="",
                             technology:str='ont',
+                            image_format:str='html',
                             thickness:int=5):
     """
     Generates visualizations of assemblies of given read names ('readgroup').
 
     readgroup: .txt with one read name per line.
     """
-    consensus_from_given_read_names(readgroup,reads,reference,fastaout,fastaout_reversed,bamout,bamout_reversed,threads,fasta_name,technology)
-    visualize_assembly(bamout,annotations,outfile_forward,chrs,thickness=thickness)
-    visualize_assembly(bamout_reversed,annotations,outfile_reverse,chrs,thickness=thickness)
+    pn = pathlib.Path(outfiles_prefix).parent
+    fn = pathlib.Path(outfiles_prefix).stem
+    consensus_from_given_read_names(readgroup,
+                                    reads,
+                                    reference,
+                                    pn / '.'.join([fn,"fwd","fasta"]),
+                                    pn / '.'.join([fn,"rvs","fasta"]),
+                                    pn / '.'.join([fn,"fwd","bam"]),
+                                    pn / '.'.join([fn,"rvs","bam"]),
+                                    threads,
+                                    fasta_name,
+                                    technology)
+    visualize_assembly(pn / '.'.join([fn,"fwd","bam"]),
+                        annotations,
+                        pn / '.'.join([fn,"fwd",image_format]),
+                        chrs,
+                        thickness=thickness)
+    visualize_assembly(pn / '.'.join([fn,"rvs","bam"]),
+                        annotations,
+                        pn / '.'.join([fn,"rvs",image_format]),
+                        chrs,
+                        thickness=thickness)

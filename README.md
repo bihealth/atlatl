@@ -22,7 +22,7 @@ Done, now you can test and use it.
 
 #### Read Mapping
 Once the input is preprocessed, a workflow in atlatl can be used to map the reads to the preprocessed reference.
-`atlatl workflow_map_ont --workdir tests/data/ --constructs tests/data/prep/constructs.fasta --in_reads tests/data/input/reads.fastq --reference tests/data/prep/ref_aug.fasta --annotations tests/data/prep/annotations.bed --cores 2`
+`atlatl workflow_map --workdir tests/data/ --constructs tests/data/prep/constructs.fasta --in_reads tests/data/input/reads.fastq --reference tests/data/prep/ref_aug.fasta --annotations tests/data/prep/annotations.bed --cores 2`
 
 #### Breakend Calculation
 `atlatl breakends --alignment tests/data/align/alignment.bam --bedfile tests/data/prep/annotations.bed --out_dir tests/data/breakends --min_alignments 5`

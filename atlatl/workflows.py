@@ -11,7 +11,7 @@ from logzero import logger
 def workflow_prep(
         workdir:str,
         alleles:list,
-        fastas:list,
+        sequences:list,
         reference:str,
         add_annotations:str=None,
         cores:int=4,
@@ -22,7 +22,7 @@ def workflow_prep(
     
     workdir: workdimap_ontr of snakemake
     alleles: list of paths to bed-files that define all additional alleles based on concatenations of sequences given in the provided "fastas"
-    fastas: list of fasta-files that contain the sequences from which alleles defined in "alleles" are constructed
+    sequences: list of fasta-files that contain the sequences from which alleles defined in "alleles" are constructed
     reference: path to the reference which will be augmented by the newly constructed alleles and shall be used in downstream read mapping
     add_annotations: path to a bedfile which contains additional annotations on the final alleles and / or the reference
     cores: cores argument passed to snakemake
@@ -31,7 +31,7 @@ def workflow_prep(
     d = {
         'workdir': workdir,
         'alleles': alleles,
-        'fastas':  fastas,
+        'sequences':  sequences,
         'reference': reference,
         'add_annotations': add_annotations
     }
@@ -58,7 +58,7 @@ def workflow_prep(
     subprocess.check_call(arguments)
 
 
-def workflow_map_ont(
+def workflow_map(
         workdir:str,
         in_reads:str,
         constructs: str,
@@ -102,7 +102,7 @@ def workflow_map_ont(
         str(
             pathlib.Path(__file__).absolute().parent
             / pathlib.Path("workflow")
-            / pathlib.Path("Snakefile_map_ont")
+            / pathlib.Path("Snakefile_map")
         ),
         "--configfile",
         str(tmp_config.name),
