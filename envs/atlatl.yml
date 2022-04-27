@@ -10,6 +10,7 @@ seqkit>=0.16.1
 seqtk>=1.3
 yaml>=0.2.5
 pysam>=0.16.0.1
+subread
 fastqc
 fastcluster
 edlib
