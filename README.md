@@ -18,7 +18,7 @@ Done, now you can test and use it.
 
 ## Run Tests of atlatl
 #### Input Preprocessing
-`atlatl workflow_prep --workdir tests/data/ --alleles tests/data/input/construct_a.bed tests/data/input/construct_b.bed --fastas tests/data/input/sequences.fasta --reference tests/data/input/ref.fasta --add_annotations tests/data/input/annotations.bed --cores 2`
+`atlatl workflow_prep --workdir tests/data/ --alleles tests/data/input/construct_a.bed tests/data/input/construct_b.bed --sequences tests/data/input/sequences.fasta --reference tests/data/input/ref.fasta --add_annotations tests/data/input/annotations.bed --cores 2`
 
 #### Read Mapping
 Once the input is preprocessed, a workflow in atlatl can be used to map the reads to the preprocessed reference.
