@@ -28,7 +28,7 @@ Once the input is preprocessed, a workflow in atlatl can be used to map the read
 `atlatl breakends --alignment tests/data/align/alignment.bam --bedfile tests/data/prep/annotations.bed --out_dir tests/data/breakends --min_alignments 5`
 
 #### Assebmle and Visualize Haplotypes
-`atlatl group_assemble_and_visualize --breakends tests/data/breakends/construct_a.tsv --annotations tests/data/prep/annotations.bed --reads tests/data/input/reads.fastq --reference tests/data/prep/ref_aug.fasta --outdir tests/data/assembly --vizdir tests/data/visualizations --threads 4`
+`atlatl group_assemble_and_visualize --breakends tests/data/breakends/construct_a.tsv --annotations tests/data/prep/annotations.bed --reads tests/data/input/reads.fastq --reference tests/data/prep/ref_aug.fasta --outdir tests/data/assembly --threads 4`
 
 ## Adjustment for Your Usage
 You can have a look at the files in `tests/data/input/` and take these as an example to work with your own data. The aim of the tests is to build two constructs `construct_a` and `construct_b` which are defined by both .bed files with their exact name. The construct_x.bed files only define the intervals of source sequences from which the constructs are built. The sequences adressed in the construct_x.bed files need to be located in any of the given .fasta files (`ref.fasta` and `sequences.fasta`). The `annotations.bed` file add annotations to the sequences. You can and you should for example define the locus on the reference genome where the constructs will be inserted. This is necessary for atlatl to calculate the correct on-target efficiency.
