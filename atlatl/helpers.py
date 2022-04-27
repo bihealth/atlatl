@@ -383,9 +383,11 @@ def print_breakends_and_overlaps(alignment_path,bed_path,save_dir,prefix="",chrs
         with tempfile.TemporaryDirectory() as tmpdir:
             aln_file = pathlib.Path(tmpdir) / "aln.bam"
             # CRITICAL: {annot[1].min()}-{annot[2].max()} makes it ncessary to define the whole region in the bed file! Not very good.
-            cmd_view = shlex.split(f"samtools view -b --write-index {str(alignment_path)} \"{chr}:{annot[1].min()}-{annot[2].max()}\" -o {str(aln_file)}")
+            cmd_view = shlex.split(f"samtools view -b {str(alignment_path)} \"{chr}:{annot[1].min()}-{annot[2].max()}\" -o {str(aln_file)}")
             logger.info(' '.join(cmd_view))
             subprocess.call(cmd_view)
+            cmd_index = shlex.split(f"samtools index {str(aln_file)}")
+            subprocess.call(cmd_index)
             A = np.array([a for a in pysam.AlignmentFile(aln_file, "rb")])
             if len(A) == 0:
                 logger.info(f"no reads aligned in region {chr}:{annot[1].min()}-{annot[2].max()}")
