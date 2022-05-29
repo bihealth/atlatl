@@ -44,6 +44,23 @@ def construct_and_save_sequences(
     if outbed:
         annotations.to_csv(outbed,sep='\t',header=False,index=False)
 
+def ontarget_QC(
+        alignments_path:str,
+        annotations_path:str,
+        out_table:str,
+        out_fig:str,
+        **kwargs):
+    """
+    This functon calculates some descriptive statistics about the aligned reads.
+    A table is printed to file and a scatter plot is saved.
+
+    alignments_path: path to e.g. alns.bam
+    annotations_path: path to bed-file that stores all annotations on all relevant targets
+    out_table: path to output table (tsv)
+    out_fig: path to output fig (html)
+    """
+    helpers.ontarget_QC(alignments_path, annotations_path, out_table, out_fig)
+
 def write_fastq_of_transitive_reads(
         reads:str,
         alleles:str,

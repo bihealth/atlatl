@@ -59,6 +59,16 @@ def get_parser():
     #parser_group_assemble_and_visualize.set_defaults(func=tools.write_fastq_of_transitive_reads)
 
     # =========================================================================
+    #  ontarget_QC
+    # =========================================================================
+    parser_ontarget_QC = subparsers.add_parser("ontarget_QC",description="This functon calculates some descriptive statistics about the aligned reads. A table is printed to file and a scatter plot is saved.")
+    parser_ontarget_QC.add_argument("-a","--alignments_path", type=os.path.abspath,required=True , help="path to e.g. alns.bam")
+    parser_ontarget_QC.add_argument("-n","--annotations_path", type=os.path.abspath,required=True , help="path to bed-file that stores all annotations on all relevant targets")
+    parser_ontarget_QC.add_argument("-o","--out_table", type=os.path.abspath,required=True , help="path to output table file (tsv)")
+    parser_ontarget_QC.add_argument("-f","--out_fig", type=os.path.abspath,required=True , help="path to output figure file (html)")
+    parser_ontarget_QC.set_defaults(func=tools.ontarget_QC)
+
+    # =========================================================================
     #  add_constructs_ro_ref
     # =========================================================================
     parser_add_constructs_ro_ref = subparsers.add_parser("add_constructs_ro_ref",description="Equivalent to cat [input ...] | seqkit seq -w [linewidth] -o [output]")
@@ -66,6 +76,7 @@ def get_parser():
     parser_add_constructs_ro_ref.add_argument("-o","--output", type=os.path.abspath,required=True , help="path to output file.")
     parser_add_constructs_ro_ref.add_argument("-w","--linewidth", type=int, default=60, help="Linewidth of output .fasta file. Default is 60.")
     parser_add_constructs_ro_ref.set_defaults(func=tools.add_constructs_ro_ref)
+
 
     # =========================================================================
     #  breakends

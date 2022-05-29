@@ -11,6 +11,7 @@ import io
 import os
 from scipy.stats import binom
 import plotly.graph_objects as go
+import plotly.express as px
 from plotly.subplots import make_subplots
 from logzero import logger
 from Bio import SeqIO
@@ -417,9 +418,80 @@ def print_breakends_and_overlaps(alignment_path,bed_path,save_dir,prefix="",chrs
             else:
                 df_be.to_csv(pathlib.Path(save_dir) / ((prefix+'.' if prefix != "" else prefix)+chr+'.tsv'),sep='\t',header=True,index=True)
 
+# =============================================================================
+#  QC after mapping
+
+def ontarget_QC(alignments_path, annotations_path, out_table, out_fig):
+    """
+    This functon calculates some descriptive statistics about the aligned reads. A table is printed to file and a scatter plot is saved.
+
+    alignments_path: path to e.g. alns.bam
+    annotations_path: path to bed-file that stores all annotations on all relevant targets
+    out_table: path to output table (tsv)
+    out_fig: path to output fig (html)
+    """
+    out_table = pathlib.Path(out_table)
+    out_fig = pathlib.Path(out_fig)
+    cmd = f"bedtools merge -d 10 -i {annotations_path}"
+    p1 = subprocess.Popen(
+            shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8"
+        )
+    output, _ = p1.communicate()
+    targets = list(map(lambda x: x[0]+':'+x[1]+'-'+x[2],[line.split('\t') for line in output.rstrip().split('\n')]))
+    D = pd.DataFrame()
+    for target in targets:
+        selected_alns = tempfile.NamedTemporaryFile(mode='w+',suffix='.bam')
+        cmd = f"samtools view -b {alignments_path} {target} -o {selected_alns.name}"
+        subprocess.check_call(shlex.split(cmd))
+        for a in pysam.AlignmentFile(selected_alns.name, "rb"):
+            D = pd.concat([D,pd.DataFrame([a.query_name, target, a.query_length, a.query_alignment_length, a.reference_length]).T])
+    D.columns = ["read","target","read length","aligned bp","ref bp"]
+    D.index = range(D.shape[0])
+    elems = set(D.loc[:,["read","target"]].T.apply(lambda x: '_'.join(x)))
+    # --- reduce DF --- #
+    D_final = pd.DataFrame(index = elems, columns=["read","target","read length","aligned bp","ref bp"])
+    D_final["read length"] = np.zeros(D_final.shape[0])
+    D_final["aligned bp"] = np.zeros(D_final.shape[0])
+    D_final["ref bp"] = np.zeros(D_final.shape[0])
+    D_final = D_final.astype({"read length":"int32","aligned bp":"int32","ref bp":"int32"})
+    for i in D.index:
+        r,t = D.loc[i,["read","target"]]
+        id = '_'.join([r,t])
+        D_final.loc[id,"read length"] += int(D.loc[i,"read length"])
+        D_final.loc[id,"read"] = r
+        D_final.loc[id,"target"] = t
+        D_final.loc[id,"aligned bp"] += int(D.loc[i,"aligned bp"])
+        D_final.loc[id,"ref bp"] += int(D.loc[i,"ref bp"])
+    # --- finalize and save DF --- #
+    D_final["target size"] = [int(x.split('-')[1]) - int(x.split('-')[0].split(':')[1]) for x in D_final["target"]]
+    D_final["read alignment percentage"] = D_final["aligned bp"] / D_final["read length"]
+    D_final["ref percentage"] = D_final["ref bp"] / D_final["target size"]
+    out_table.parent.mkdir(parents=True, exist_ok=True)
+    if not str(out_table).endswith('.tsv'):
+        out_table = str(out_table) + '.tsv'
+        logger.warn(f"renamed input file to {out_table}")
+    D_final.to_csv(out_table, sep='\t',index=False)
+    # --- print figure --- #
+    fig_lp = px.scatter(D_final, x="read length", y="read alignment percentage",
+        opacity=0.5, color="target", marginal_x="histogram", marginal_y="histogram",
+        hover_data=D_final.columns)
+    out_fig.parent.mkdir(parents=True, exist_ok=True)
+    if not str(out_fig).endswith('.html'):
+        out_fig = str(out_fig) + '.html'
+        logger.warn(f"renamed input file to {out_fig}")
+    fig_lp.write_html(out_fig)
 
 # =============================================================================
 #  selective_assembly
+
+def on_target_QC(alignments_path, annotations_path, output):
+    # pick each consecutive region R in annotations
+    annotations = pd.read_csv(annotations_path,sep='\t')
+    annotations.astype({'city':'string', 'num_candidates':'int32'})
+    # for r in R:
+    #   select all alignments
+    #   table.loc[readname,aligned] += aligned bases
+    #   table.loc[readname,length]  = read length
 
 # gets a path to breakends.tsv and an out_dir name to isolate all informative readgroups and
 # returns the generated filepaths.
@@ -546,7 +618,8 @@ def visualize_assembly(alignments_path:pathlib.PosixPath,annotations_path:pathli
     if len(chrs) > 0:
         chromosomes = list(set(chrs).intersection(set(np.unique(np.array(list(alignments.keys()))))))
         if len(chromosomes) == 0:
-            raise "No chromosomes selected to print. check spelling or leave chromosmes blank"
+            logger.warn("No chromosomes selected to print. check spelling or leave chromosmes blank")
+            return
     else:
         chromosomes = np.unique(np.array(list(alignments.keys())))
     fig = make_subplots(rows=len(chromosomes), cols=1)
@@ -695,7 +768,7 @@ def visualize_assembly(alignments_path:pathlib.PosixPath,annotations_path:pathli
         fig.write_html(outpath)
     else:
         fig.write_image(outpath)
-    return fig
+    #return fig
 
 # =============================================================================
 #  selective_assembly & visualization

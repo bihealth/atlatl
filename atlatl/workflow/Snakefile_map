@@ -30,6 +30,9 @@ ref_align = "align/alignment.bam"
 salign = "align/salign.bam"
 sreads = "fastq/sreads.fastq"
 
+out_table = "QC/readstats.tsv"
+out_fig = "QC/scatter.html"
+
 # =============================================================================
 #  UTIL
 
@@ -45,7 +48,9 @@ rule all:
         ref_align,
         fcounts,
         sreads,
-        salign
+        salign,
+        out_table,
+        out_fig
 
 # -----------------------------------------------------------------------------
 #  ALIGNMENT
@@ -63,6 +68,23 @@ rule align:
         int(max(0,int(workflow.cores) -1))
     shell:
         "minimap2 -t {threads} {params} {input} | samtools view -b | samtools sort > {output}; samtools index {output}"
+
+# -----------------------------------------------------------------------------
+#  QC
+# -----------------------------------------------------------------------------
+
+rule QC:
+    input:
+        aln=ref_align,
+        annot=annotations,
+    output:
+        tab=out_table,
+        fig=out_fig,
+    threads:
+        1
+    shell:
+        "atlatl ontarget_QC -a {input.aln} -n {input.annot} -o {output.tab} -f {output.fig}"
+
 
 # -----------------------------------------------------------------------------
 #  FEATURE COUNTS
