@@ -336,5 +336,5 @@ run_rtbedmerge.sh
 log.log
 
 tests/testdata/logs
-tests/testdata/.snakemake
+tests/data/.snakemake
 
