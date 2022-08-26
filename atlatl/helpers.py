@@ -560,7 +560,7 @@ def consensus_from_given_read_names(readnames,reads,reference,fastaout,fastaout_
     p_grep.communicate()
     # consensus from tmpfile to fastaout (tmpfile,fastaout)
 
-    subprocess.check_call(shlex.split(f"cp {selected_reads.name} /fast/work/users/mayv_c/development/atlatl/tests/data/assembly/selected_reads.fastq"))
+    # subprocess.check_call(shlex.split(f"cp {selected_reads.name} /fast/work/users/mayv_c/development/atlatl/tests/data/assembly/selected_reads.fastq"))
 
     matfile = os.path.join(os.path.dirname(__file__), "lamassemble", mats[technology])
     cmd_smbl = shlex.split(f"lamassemble -P {threads} -n {fasta_name} {matfile} {selected_reads.name}")
