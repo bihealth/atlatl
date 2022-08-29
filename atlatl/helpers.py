@@ -625,7 +625,7 @@ def visualize_assembly(alignments_path:pathlib.PosixPath,annotations_path:pathli
             return
     else:
         chromosomes = np.unique(np.array(list(alignments.keys())))
-    if chromosomes < 1:
+    if len(chromosomes) < 1:
         logger.warn(f"selected chromosomes: {str(chrs)} but alignments was empty: {str(alignments)}")
         return
     fig = make_subplots(rows=len(chromosomes), cols=1)
