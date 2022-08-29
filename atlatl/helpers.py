@@ -625,6 +625,9 @@ def visualize_assembly(alignments_path:pathlib.PosixPath,annotations_path:pathli
             return
     else:
         chromosomes = np.unique(np.array(list(alignments.keys())))
+    if chromosomes < 1:
+        logger.warn(f"selected chromosomes: {str(chrs)} but alignments was empty: {str(alignments)}")
+        return
     fig = make_subplots(rows=len(chromosomes), cols=1)
     for chri,chr in enumerate(chromosomes):
         alns = np.array(list(alignments[chr]))
@@ -851,3 +854,52 @@ def assemble_and_visualize(readgroup:str,
                         pn / '.'.join([fn,"rvs",image_format]),
                         chrs,
                         thickness=thickness)
+    # align reads to assemblies
+    logger.info("aligning selected reads to read assembly..")
+    align_readgroup_to_reference(
+            readnames=readgroup,
+            reads=reads,
+            reference=pn / '.'.join([fn,"fwd","fasta"]),
+            bamout=pn / '.'.join([fn,"readgroup_to_assembly","fwd","bam"]),
+            threads=threads)
+    align_readgroup_to_reference(
+            readnames=readgroup,
+            reads=reads,
+            reference=reference,
+            bamout=pn / '.'.join([fn,"readgroup_to_reference","fwd","bam"]),
+            threads=threads)
+
+# new
+# creates indexed and sorted bam files
+def align_reads_to_ref(reference, reads, bamout, threads:int=4, param_r:int=0, param_z:int=0):
+    if not pathlib.Path(str(pathlib.Path(reference) / '.fai')).is_file():
+        logger.info(f"Creating index for reference file {reference}.fai")
+        subprocess.check_call(shlex.split(f"samtools faidx {reference}"))
+    t_param_r = f" -r{str(param_r)},{str(param_r)}" if param_r else ""
+    t_param_z = f" -r{str(param_z)},{str(param_z)}" if param_r else ""
+    cmd_align = shlex.split(f"minimap2 -a -x map-ont -t {threads} {t_param_r} {t_param_z} {reference} {reads}")
+    cmd_compress = shlex.split("samtools view -b")
+    cmd_sort = shlex.split(f"samtools sort -o {bamout}")
+    cmd_index = shlex.split(f"samtools index {bamout}")
+    p_align = subprocess.Popen(cmd_align, stdout=subprocess.PIPE)
+    p_compress= subprocess.Popen(cmd_compress,stdin=p_align.stdout, stdout=subprocess.PIPE)
+    p_align.stdout.close()
+    p_sort= subprocess.Popen(cmd_sort,stdin=p_compress.stdout)
+    p_compress.stdout.close()
+    logger.info(f"aligning reads, compressing and sorting alignment..")
+    logger.info(f"calling: {' '.join(cmd_align)}")
+    p_sort.communicate()
+    subprocess.call(cmd_index)
+
+def align_readgroup_to_reference(readnames,reads,reference,bamout,threads:int=4, param_r:int=0, param_z:int=0):
+    # extract reads from given reads file according to given read group (txt file with read name per line)
+    cmd_read = shlex.split(f"zcat -f {reads}")
+    cmd_grep = shlex.split(f"grep --no-group-separator -A 3 -f {readnames}") # pipe from read
+    selected_reads = tempfile.NamedTemporaryFile(suffix='.fastq') # stdout of grep to this file
+    p_read = subprocess.Popen(cmd_read, stdout=subprocess.PIPE)
+    p_grep = subprocess.Popen(cmd_grep, stdin=p_read.stdout,stdout=selected_reads)
+    logger.info(f"selecting reads from {readnames} in {reads}..")
+    p_grep.communicate()
+    # align to reference
+    align_reads_to_ref(reference, selected_reads.name, bamout, threads, param_r, param_z)
+
