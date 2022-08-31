@@ -802,8 +802,7 @@ def group_assemble_and_visualize(
     filenames = readgroups_to_files(breakends,outdir,prefix,minimum_reads)
     for i,readgroup in enumerate(filenames):
         strkey = str(i).zfill(len(str(len(filenames))))
-        used_prefix = strkey if prefix == "" else prefix + '.' + strkey
-        outfiles_prefix = pathlib.Path(outdir) / used_prefix
+        outfiles_prefix = pathlib.Path(outdir) / (prefix + '.' + strkey)
         assemble_and_visualize(
                             readgroup=readgroup,
                             annotations=annotations,
@@ -833,7 +832,7 @@ def assemble_and_visualize(readgroup:str,
     readgroup: .txt with one read name per line.
     """
     pn = pathlib.Path(outfiles_prefix).parent
-    fn = pathlib.Path(outfiles_prefix).stem
+    fn = str(outfiles_prefix) #.stem
     consensus_from_given_read_names(readgroup,
                                     reads,
                                     reference,
@@ -855,11 +854,12 @@ def assemble_and_visualize(readgroup:str,
                         chrs,
                         thickness=thickness)
     # align reads to assemblies
-    logger.info("aligning selected reads to read assembly..")
+    ref = pn / '.'.join([fn,"fwd","fasta"])
+    logger.info(f"aligning selected reads to read assembly {str(ref)}")
     align_readgroup_to_reference(
             readnames=readgroup,
             reads=reads,
-            reference=pn / '.'.join([fn,"fwd","fasta"]),
+            reference=ref,
             bamout=pn / '.'.join([fn,"readgroup_to_assembly","fwd","bam"]),
             threads=threads)
     align_readgroup_to_reference(
