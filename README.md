@@ -3,7 +3,7 @@ Clone this directory.
 `git clone git@github.com:bihealth/atlatl.git`
 
 Create a fresh conda environment.
-`conda create -n atlatl --file envs/atlatl.yml -y`
+`conda env create -n atlatl --file envs/atlatl.yml -y`
 
 Then activate the environment.
 `conda activate atlatl`
